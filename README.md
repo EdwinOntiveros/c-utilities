@@ -1,4 +1,4 @@
-# C Utilities - [_Wiki_](https://github.com/EdwinOntiveros/c-utilities/wiki/C-Utilities)
+# C Utilities
 This set of utilities were created over many of my coding sessions, to simplify or accomplish certain repetitive tasks
 without too much overhead and boilerplate.
 
@@ -14,6 +14,10 @@ the past such as:
 ## Utility list
 
 > List of utilities
+
+- [ ] Bitwise-owl
+	- [ ] Bitwise operations W.I.P
+	- [ ] Bitwise flags 
 
 - [ ] Linked List
 	- [ ] Single linked
