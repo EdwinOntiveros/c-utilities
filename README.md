@@ -16,8 +16,8 @@ the past such as:
 > List of utilities
 
 - [ ] Bitwise-owl
-	- [ ] Bitwise operations W.I.P
-	- [ ] Bitwise flags 
+	- [ ] Bitwise perations W.I.P
+	- [ ] Bitwise property flags 
 
 - [ ] Linked List
 	- [ ] Single linked
