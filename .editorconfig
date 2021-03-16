@@ -1,4 +1,4 @@
-[{Makefile,makefile,*}.{c,cc,cpp,h,hh,hpp}]
+[{Makefile,makefile},*.{c,cc,cpp,h,hh,hpp}]
 indent_style = tab
 indent_size = 4
 trim_trailing_whitsepace = true
