@@ -4,23 +4,20 @@
 
 #include <stdint.h>
 
-#if defined(OS_ARCH)
+#ifdef OS_ARCH
 #	undef OS_ARCH
-#	define OS_ARCH 32
-#endif // OS_ARCH
+#endif
 
 #if defined(__gnu_linux__) || defined(__linux) || defined(__linux__)
 #	if defined(__x86_64) || defined(__x86_64__)
-#		if defined(OS_ARCH)
-#			undef OS_ARCH
-#			define OS_ARCH 32
-#		endif // OS_ARCH
+#			define OS_ARCH 64
 #	endif // x86_64
 #elif defined(_WIN64) || defined(__WIN64) || defined(_WIN32) || defined(__WIN32)
 #	if defined(_WIN64) || defined(__WIN64)
-#		undef OS_ARCH
 #		define OS_ARCH 64
 #	endif // win_64
+#else
+#	define OS_ARCH 32
 #endif  // determine os arch
 
 #if defined(_STDINT_H)
@@ -34,8 +31,6 @@ typedef uint32_t	uint32;
 #if defined(OS_ARCH) && OS_ARCH == 64
 typedef int64_t		int64;
 typedef uint64_t	uint64;
-typedef intptr_t	intptr;
-typedef uintptr_t	uintptr;
 #endif // 64 bit ints
 
 #else
@@ -46,8 +41,6 @@ typedef short			int16;
 typedef unsigned short	uint16;
 typedef int				int32;
 typedef unsigned int	uint32;
-typedef int				*intptr;
-typedef unsigned int	*uintptr;
 #if defined(OS_ARCH) && OS_ARCH == 64
 typedef long long int			int64;
 typedef unsigned long long int	uint64;
@@ -59,7 +52,7 @@ typedef unsigned long long int	uint64;
 typedef void * Handle;
 typedef union U_MultiType
 {
-	union
+	struct
 	{
 		union
 		{
@@ -67,7 +60,7 @@ typedef union U_MultiType
 			int16	i16; uint16	ui16;
 			int32	i32; uint32	ui32;
 #if defined(OS_ARCH) && OS_ARCH == 64
-			int64	i64; uint64	i64;	
+			int64	i64; uint64	ui64;	
 #endif //
 		};
 #if defined(OS_ARCH) && OS_ARCH == 64
@@ -77,7 +70,7 @@ typedef union U_MultiType
 #endif //
 	} Integers;
 
-	union
+	struct
 	{
 		union
 		{
@@ -88,7 +81,7 @@ typedef union U_MultiType
 		long double raw;
 	} FloatingPoint;
 
-	union
+	struct
 	{
 		union
 		{
@@ -121,18 +114,23 @@ typedef enum E_TypeTag
 } TypeTag;
 
 /* -------- functions -------------*/
-void	cutypes_store_integer(const Handle value, MultiType * mt, TypeTag t);
-void	cutypes_store_floating_point(const Handle value, MultiType * mt, TypeTag t);
-void	cutypes_store_pointer(const Handle value, MultiType * mt, TypeTag t);
+void cutypes_store_integer(const Handle value, MultiType * mt, TypeTag t);
+void cutypes_store_floating_point(const Handle value, MultiType * mt, TypeTag t);
+void cutypes_store_pointer(const Handle value, MultiType * mt, TypeTag t);
+
 #if defined(OS_ARCH) && OS_ARCH == 64
-int64	cutypes_raw_integer(MultiType * mt);
-uint64	cutypes_raw_uinteger(MultiType * mt);
+int64   cutypes_raw_integer(MultiType * mt);
+uint64  cutypes_raw_uinteger(MultiType * mt);
 #else
-int32	cutypes_raw_integer(MultiType * mt);
-uint32	cutypes_raw_uinteger(MultiType * mt);
+int32   cutypes_raw_integer(MultiType * mt);
+uint32  cutypes_raw_uinteger(MultiType * mt);
 #endif // OS_ARCH for raw integer retreieval
-long double	cutypes_raw_floating_point(MultiType * mt);
-Handle		cutypes_raw_pointer(MultiType * mt);
+
+long double cutypes_raw_floating_point(MultiType * mt);
+Handle      cutypes_raw_pointer(MultiType * mt);
+
+/* internal functions */
+void cutypes_internal_print(const MultiType * mt);
 
 #endif // CUTYPES_CUTYPES_H
 

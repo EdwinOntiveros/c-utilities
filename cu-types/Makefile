@@ -7,8 +7,8 @@ TESTSDIR	:= tests
 BUILDDIR	:= build
 
 #Set compiler options
-CC 			:= clang -std=c17
-CFLAGS		:= -Wall -Weverything --extra-warnings
+CC 			:= clang
+CFLAGS		:= -std=c17 -Wall -Weverything --extra-warnings
 DFLAGS		:= -glldb -fdebug-macro 
 SANITOPTS	:= -fsanitize=address,return,undefined
 OFLAGS		?=
@@ -27,21 +27,23 @@ SRCS		:= $(wildcard $(SRCDIR)/*.$(SRCEXT))
 TESTS		:= $(wildcard $(TESTSDIR)/*.$(SRCEXT))
 OBJS		?= 
 
-.phony: clean all debug test
+.phony: clean debug_all release_all
 
-all: debug test
+all: debug_all release_all 
 
 clean:
 	rm -rf ./*.o 	$(OBJDIR)/*.o
 	rm -rf ./*.out 	$(BUILDDIR)/*.out $(LIBDIR)/*.*
 
-debug: $(SRCS)
-	$(CC) -c $? $(CFLAGS) $(DFLAGS) -O1
-	@mv *.$(OBJEXT) $(OBJDIR)
+debug_all: clean debug_main
+release_all: clean release_main
 
-test: $(TESTS) 
+debug_main: $(SRCS)
 	$(CC) -c $? $(CFLAGS) $(DFLAGS) -O1
-	@mv *.$(OBJEXT) $(OBJDIR)
-	$(CC) -o $(TARGETNAME)_test.out $(OBJDIR)/*.$(OBJEXT) 
-	@mv *.out $(BUILDDIR)
-	
+	@mv ./*.$(OBJEXT) $(OBJDIR)
+
+release_main: $(SRCS)
+	$(CC) -c $? $(CFLAGS) $(SANITOPTS) -DNDEBUG -O3
+	@mv ./*.$(OBJEXT) $(OBJDIR)
+
+
