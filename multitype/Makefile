@@ -46,4 +46,3 @@ release_main: $(SRCS)
 	$(CC) -c $? $(CFLAGS) $(SANITOPTS) -DNDEBUG -O3
 	@mv ./*.$(OBJEXT) $(OBJDIR)
 
-

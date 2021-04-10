@@ -56,17 +56,17 @@ typedef union U_MultiType
 	{
 		union
 		{
-			int8	i8;	 uint8	ui8;
-			int16	i16; uint16	ui16;
-			int32	i32; uint32	ui32;
+			int8  i8;  uint8  ui8;
+			int16 i16; uint16 ui16;
+			int32 i32; uint32 ui32;
 #if defined(OS_ARCH) && OS_ARCH == 64
-			int64	i64; uint64	ui64;	
+			int64 i64; uint64 ui64;	
 #endif //
 		};
 #if defined(OS_ARCH) && OS_ARCH == 64
-			int64	raw_i; uint64 raw_ui;
+			int64 raw_i; uint64 raw_ui;
 #else
-			int32	raw_i; uint32 raw_ui;
+			int32 raw_i; uint32 raw_ui;
 #endif //
 	} Integers;
 
@@ -74,8 +74,8 @@ typedef union U_MultiType
 	{
 		union
 		{
-			float		f;
-			double		d;
+			float  f;
+			double d;
 			long double ld;
 		};
 		long double raw;
@@ -85,8 +85,8 @@ typedef union U_MultiType
 	{
 		union
 		{
-			Handle ptr;
-			char * str;
+			Handle pointer;
+			char * string;
 		};
 		Handle raw;
 	} Pointer;
@@ -109,28 +109,28 @@ typedef enum E_TypeTag
 	TT_FLOAT,
 	TT_DOUBLE,
 	TT_LONG_DOUBLE,
+	TT_COUNT,
 	TT_NULL,
-	TT_COUNT
 } TypeTag;
 
 /* -------- functions -------------*/
-void cutypes_store_integer(const Handle value, MultiType * mt, TypeTag t);
-void cutypes_store_floating_point(const Handle value, MultiType * mt, TypeTag t);
-void cutypes_store_pointer(const Handle value, MultiType * mt, TypeTag t);
+void store_integer(const Handle value, MultiType * mt, TypeTag t);
+void store_floating_point(const Handle value, MultiType * mt, TypeTag t);
+void store_pointer(const Handle value, MultiType * mt, TypeTag t);
 
 #if defined(OS_ARCH) && OS_ARCH == 64
-int64   cutypes_raw_integer(MultiType * mt);
-uint64  cutypes_raw_uinteger(MultiType * mt);
+int64  read_raw_integer(const MultiType * const mt);
+uint64 read_raw_uinteger(const MultiType * const mt);
 #else
-int32   cutypes_raw_integer(MultiType * mt);
-uint32  cutypes_raw_uinteger(MultiType * mt);
+int32  read_raw_integer(const MultiType * const mt);
+uint32 read_raw_uinteger(const MultiType * const  mt);
 #endif // OS_ARCH for raw integer retreieval
 
-long double cutypes_raw_floating_point(MultiType * mt);
-Handle      cutypes_raw_pointer(MultiType * mt);
+long double read_raw_floating_point(const MultiType * const mt);
+Handle read_raw_pointer(const MultiType * const mt);
 
 /* internal functions */
-void cutypes_internal_print(const MultiType * mt);
+void internal_print_multitype_layout(const MultiType * const mt);
 
 #endif // CUTYPES_CUTYPES_H
 

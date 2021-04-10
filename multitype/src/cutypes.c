@@ -1,9 +1,10 @@
 #include <assert.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include "../include/cutypes.h"
 
-void cutypes_store_integer(const Handle val, MultiType * mt, TypeTag t)
+void store_integer(const Handle val, MultiType * mt, TypeTag t)
 {
 	assert(val);
 	assert(mt);
@@ -39,7 +40,7 @@ void cutypes_store_integer(const Handle val, MultiType * mt, TypeTag t)
 	}
 }
 
-void cutypes_store_floating_point(const Handle val, MultiType * mt, TypeTag t)
+void store_floating_point(const Handle val, MultiType * mt, TypeTag t)
 {
 	assert(val);
 	assert(mt);
@@ -58,7 +59,7 @@ void cutypes_store_floating_point(const Handle val, MultiType * mt, TypeTag t)
 	}
 }
 
-void cutypes_store_pointer(const Handle val, MultiType * mt, TypeTag t)
+void store_pointer(const Handle val, MultiType * mt, TypeTag t)
 {
 	assert(val);
 	assert(mt);
@@ -66,66 +67,78 @@ void cutypes_store_pointer(const Handle val, MultiType * mt, TypeTag t)
 	switch(t)
 	{
 		default: case TT_POINTER:
-			mt->Pointer.ptr = val;
+			mt->Pointer.pointer = val;
 			break;
 		case TT_STRING:
-			mt->Pointer.str = (char *)val;
+			mt->Pointer.string = (char *)val;
 			break;
 	}
 }
 
-int64 cutypes_raw_integer(MultiType * mt)
+int64 read_raw_integer(const MultiType * const mt)
 {
 	assert(mt);
 	return mt->Integers.raw_i;
 }
 
-uint64 cutypes_raw_uinteger(MultiType * mt)
+uint64 read_raw_uinteger(const MultiType * const mt)
 {
 	assert(mt);
 	return mt->Integers.raw_ui;
 }
 
-long double cutypes_raw_floating_point(MultiType * mt)
+long double read_raw_floating_point(const MultiType * const mt)
 {
 	assert(mt);
 	return mt->FloatingPoint.raw;
 }
 
-Handle cutypes_raw_pointer(MultiType * mt)
+Handle read_raw_pointer(const MultiType * const mt)
 {
 	assert(mt);
 	return mt->Pointer.raw;
 }
 
 // internal
-void cutypes_internal_print(const MultiType * mt)
+void internal_print_multitype_layout(const MultiType * const mt)
 {
     printf(
+        "Size of mt : %zd\n"
         "Integers:\n"
         "{\n"
         "-    i8: %d    ui8: %d\n"
         "-   i16: %d   ui16: %d\n"
         "-   i32: %d   ui32: %d\n"
 #if defined(OS_ARCH) && OS_ARCH == 64
-        "-   i64: %ld   ui64: %lu\n"
+        "-   i64: %ld  ui64: %lu\n"
 #endif
         "- raw_i: %ld raw_ui: %lu\n"
         "}\n"
+        "offset: %zd\n"
+        "address: %p\n\n"
         "Floating point:\n"
+
         "{\n"
-        "-       float: %e\n"
+        "-       float: %f\n"
         "-      double: %e\n"
         "- long double: %Le\n"
         "-         raw: %Le\n"
         "}\n"
+        "offset: %zd\n"
+        "address: %p\n\n"
+
         "Pointer:\n"
         "{\n"
         "-     pointer: %p\n"
         "-      string: %s\n"
         "-         raw: %p\n"
         "}\n"
+        "offset: %zd\n"
+        "address: %p\n\n"
         ,
+
+        sizeof(*mt),
+// integers
         mt->Integers.i8,    mt->Integers.ui8,
         mt->Integers.i16,   mt->Integers.ui16,
         mt->Integers.i32,   mt->Integers.ui32,
@@ -133,15 +146,23 @@ void cutypes_internal_print(const MultiType * mt)
         mt->Integers.i64,   mt->Integers.ui64,
 #endif
         mt->Integers.raw_i, mt->Integers.raw_ui,
+        (size_t) offsetof(MultiType,Integers),
+        &mt->Integers,
+
 // floating point
         mt->FloatingPoint.f,
         mt->FloatingPoint.d,
         mt->FloatingPoint.ld,
         mt->FloatingPoint.raw,
+        (size_t) offsetof(MultiType,FloatingPoint),
+        &mt->FloatingPoint,
+
 // pointers
-        mt->Pointer.ptr,
-        mt->Pointer.str,
-        mt->Pointer.raw
+        mt->Pointer.pointer,
+        mt->Pointer.string,
+        mt->Pointer.raw,
+        (size_t) offsetof(MultiType,Pointer),
+        &mt->Pointer
     );
 }
 
