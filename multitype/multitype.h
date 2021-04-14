@@ -1,6 +1,6 @@
 #pragma once
-#ifndef CUTYPES_CUTYPES_H
-#define CUTYPES_CUTYPES_H 1
+#ifndef CUTILITIES_MULTITYPE_H
+#define CUTILITIES_MULTITYPE_H 1
 
 #include <stdint.h>
 
@@ -114,6 +114,11 @@ typedef enum E_TypeTag
 } TypeTag;
 
 /* -------- functions -------------*/
+
+#if defined(__cplusplus)
+extern "C" {
+#endif // __cplusplus
+
 void store_integer(const Handle value, MultiType * mt, TypeTag t);
 void store_floating_point(const Handle value, MultiType * mt, TypeTag t);
 void store_pointer(const Handle value, MultiType * mt, TypeTag t);
@@ -132,5 +137,9 @@ Handle read_raw_pointer(const MultiType * const mt);
 /* internal functions */
 void internal_print_multitype_layout(const MultiType * const mt);
 
-#endif // CUTYPES_CUTYPES_H
+#if defined(__cplusplus)
+}
+#endif // __cplusplus
+
+#endif // CUTILITIES_MULTITYPE_H
 

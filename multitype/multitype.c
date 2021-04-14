@@ -2,7 +2,8 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
-#include "../include/cutypes.h"
+
+#include "cutypes.h"
 
 void store_integer(const Handle val, MultiType * mt, TypeTag t)
 {
