@@ -1,169 +1,172 @@
-#include <assert.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <stdio.h>
+#include "multitype.h"
 
-#include "cutypes.h"
-
-void store_integer(const Handle val, MultiType * mt, TypeTag t)
+enum E_Multitype_types
 {
-	assert(val);
-	assert(mt);
+	MULTITYPE_TYPE_INT8,
+	MULTITYPE_TYPE_INT16,
+	MULTITYPE_TYPE_INT32,
+	MULTITYPE_TYPE_INT64,
+	MULTITYPE_TYPE_UINT8,
+	MULTITYPE_TYPE_UINT16,
+	MULTITYPE_TYPE_UINT32,
+	MULTITYPE_TYPE_UINT64,
 
-	switch(t)
+	MULTITYPE_TYPE_FLOAT32,
+	MULTITYPE_TYPE_FLOAT64,
+	MULTITYPE_TYPE_FLOATX,
+
+	MULTITYPE_TYPE_STRING,
+	MULTITYPE_TYPE_HANDLE,
+
+	MULTITYPE_TYPE_COUNT
+};
+
+union U_Multitype
+{
+	struct
 	{
-		case TT_INT8:
-			mt->Integers.i8 = *((int8 *)val);
-			break;
-		case TT_UINT8:
-			mt->Integers.ui8 = *((uint8 *)val);
-			break;
-		case TT_INT16:
-			mt->Integers.i16 = *((int16 *)val);
-			break;
-		case TT_UINT16:
-			mt->Integers.ui16 = *((uint16 *)val);
-			break;
-		default: case TT_INT32:
-			mt->Integers.i32 = *((int32 *)val);
-			break;
-		case TT_UINT32:
-			mt->Integers.ui32 = *((uint32 *)val);
-			break;
-#if defined(OS_ARCH) && OS_ARCH == 64
-		case TT_INT64:
-			mt->Integers.i64 = *((int64 *)val);
-			break;
-		case TT_UINT64:
-			mt->Integers.ui64 = *((uint64 *)val);
-			break;
-#endif // handle 64 bits
+		union
+		{
+			int8 	i8;
+			int16 	i16;
+			int32 	i32;
+			int64 	i64;
+			uint8 	ui8;
+			uint16 	ui16;
+			uint32 	ui32;
+			uint64 	ui64;
+		};
+	} Integer;
+
+	struct
+	{
+		union
+		{
+			float32 f32;
+			float64 f64;
+			floatX  fX;
+		};
+	} Float;
+
+	struct
+	{
+		union
+		{
+			Handle 		handle;
+			RawString 	string;
+		};
+	} Pointer;
+};
+
+Multitype * newMultitype(void)
+{
+	Multitype * multitype = (Multitype *)malloc(sizeof *multitype);
+
+	if (!multitype) { return NULL; }
+	multitype = (Multitype *){0};
+
+	return multitype;
+}
+
+void deleteMultitype(Multitype ** mt)
+{
+	if (!mt && !*mt) { return; }
+	*mt = (Multitype *){0};
+	free(*mt);
+	*mt = NULL;
+}
+
+void storeInteger(Multitype * mt, Multitype_Type type, const Handle value)
+{
+	// switch on type enum
+	switch (type)
+	{
+	case MULTITYPE_TYPE_INT8:
+		mt->Integer.i8 = *(int8 *) value;
+		break;
+	case MULTITYPE_TYPE_INT16:
+		mt->Integer.i16 = *(int16 *) value;
+		break;
+	case MULTITYPE_TYPE_INT32:
+		mt->Integer.i32 = *(int32 *) value;
+		break;
+	case MULTITYPE_TYPE_INT64:
+		mt->Integer.i64 = *(int64 *) value;
+		break;
+	case MULTITYPE_TYPE_UINT8:
+		mt->Integer.ui8 = *(uint8 *) value;
+		break;
+	case MULTITYPE_TYPE_UINT16:
+		mt->Integer.ui16 = *(uint16 *) value;
+		break;
+	case MULTITYPE_TYPE_UINT32:
+		mt->Integer.ui32 = *(uint32 *) value;
+		break;
+	default:
+	case MULTITYPE_TYPE_UINT64:
+		mt->Integer.ui64 = *(uint64 *) value;
+		break;
 	}
 }
 
-void store_floating_point(const Handle val, MultiType * mt, TypeTag t)
+void storeFloat(Multitype * mt, Multitype_Type type, const Handle value)
 {
-	assert(val);
-	assert(mt);
-
-	switch(t)
+	// switch on type enum
+	switch (type)
 	{
-		case TT_FLOAT:
-			mt->FloatingPoint.f = *((float *)val);
-			break;
-		case TT_DOUBLE:
-			mt->FloatingPoint.d = *((double *)val);
-			break;
-		default: case TT_LONG_DOUBLE:
-			mt->FloatingPoint.ld = *((long double *)val);
-			break;
+	case MULTITYPE_TYPE_FLOAT32:
+		mt->Float.f32 = *(float32 *) value;
+		break;
+	default:
+	case MULTITYPE_TYPE_FLOAT64:
+		mt->Float.f64 = *(float64 *) value;
+		break;
+	case MULTITYPE_TYPE_FLOATX:
+		mt->Float.fX = *(floatX *) value;
+		break;
 	}
 }
 
-void store_pointer(const Handle val, MultiType * mt, TypeTag t)
+void storePointer(Multitype * mt, Multitype_Type type, const Handle value)
 {
-	assert(val);
-	assert(mt);
-
-	switch(t)
+	// switch on type enum
+	switch (type)
 	{
-		default: case TT_POINTER:
-			mt->Pointer.pointer = val;
-			break;
-		case TT_STRING:
-			mt->Pointer.string = (char *)val;
-			break;
+	case MULTITYPE_TYPE_HANDLE:
+		mt->Pointer.handle = value;
+		break;
+	case MULTITYPE_TYPE_STRING:
+		mt->Pointer.string = (RawString *) value;
+		break;
 	}
 }
 
-int64 read_raw_integer(const MultiType * const mt)
+int64   readInteger(const Multitype * const mt)
 {
-	assert(mt);
-	return mt->Integers.raw_i;
+	return mt->Integer.i64;
 }
 
-uint64 read_raw_uinteger(const MultiType * const mt)
+uint64  readUInteger(const Multitype * const mt)
 {
-	assert(mt);
-	return mt->Integers.raw_ui;
+	return mt->Integer.ui64;
 }
 
-long double read_raw_floating_point(const MultiType * const mt)
+float32 readFloat32(const Multitype * const mt)
 {
-	assert(mt);
-	return mt->FloatingPoint.raw;
+	return mt->Float.f32;
 }
 
-Handle read_raw_pointer(const MultiType * const mt)
+float64 readFloat64(const Multitype * const mt)
 {
-	assert(mt);
-	return mt->Pointer.raw;
+	return mt->Float.f64;
 }
 
-// internal
-void internal_print_multitype_layout(const MultiType * const mt)
+floatX  readFloatX(const Multitype * const mt)
 {
-    printf(
-        "Size of mt : %zd\n"
-        "Integers:\n"
-        "{\n"
-        "-    i8: %d    ui8: %d\n"
-        "-   i16: %d   ui16: %d\n"
-        "-   i32: %d   ui32: %d\n"
-#if defined(OS_ARCH) && OS_ARCH == 64
-        "-   i64: %ld  ui64: %lu\n"
-#endif
-        "- raw_i: %ld raw_ui: %lu\n"
-        "}\n"
-        "offset: %zd\n"
-        "address: %p\n\n"
-        "Floating point:\n"
-
-        "{\n"
-        "-       float: %f\n"
-        "-      double: %e\n"
-        "- long double: %Le\n"
-        "-         raw: %Le\n"
-        "}\n"
-        "offset: %zd\n"
-        "address: %p\n\n"
-
-        "Pointer:\n"
-        "{\n"
-        "-     pointer: %p\n"
-        "-      string: %s\n"
-        "-         raw: %p\n"
-        "}\n"
-        "offset: %zd\n"
-        "address: %p\n\n"
-        ,
-
-        sizeof(*mt),
-// integers
-        mt->Integers.i8,    mt->Integers.ui8,
-        mt->Integers.i16,   mt->Integers.ui16,
-        mt->Integers.i32,   mt->Integers.ui32,
-#if defined(OS_ARCH) && OS_ARCH == 64
-        mt->Integers.i64,   mt->Integers.ui64,
-#endif
-        mt->Integers.raw_i, mt->Integers.raw_ui,
-        (size_t) offsetof(MultiType,Integers),
-        &mt->Integers,
-
-// floating point
-        mt->FloatingPoint.f,
-        mt->FloatingPoint.d,
-        mt->FloatingPoint.ld,
-        mt->FloatingPoint.raw,
-        (size_t) offsetof(MultiType,FloatingPoint),
-        &mt->FloatingPoint,
-
-// pointers
-        mt->Pointer.pointer,
-        mt->Pointer.string,
-        mt->Pointer.raw,
-        (size_t) offsetof(MultiType,Pointer),
-        &mt->Pointer
-    );
+	return mt->Float.fX;
 }
 
+Handle  readPointer(const Multitype * const mt)
+{
+	return mt->Pointer.handle;
+}
